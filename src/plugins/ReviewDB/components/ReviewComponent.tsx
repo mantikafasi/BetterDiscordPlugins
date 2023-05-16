@@ -19,7 +19,7 @@
 
 import { Review } from "../entities/Review";
 import { deleteReview, getReviews, reportReview } from "../Utils/ReviewDBAPI";
-import { canDeleteReview, openUserProfileModal, showToast, classes} from "../Utils/Utils";
+import { canDeleteReview, openUserProfileModal, showToast, classes, getSetting} from "../Utils/Utils";
 import { MessageButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 const React = BdApi.React as typeof import("react");
@@ -29,6 +29,9 @@ const { container, isHeader } = findModuleByProps("container", "isHeader")
 const { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo")
 const buttonClasses = findModuleByProps("button", "wrapper", "selected")
 const Alerts = BdApi.findModuleByProps("show","close");
+const Timestamp = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"))
+const moment = BdApi.findModuleByProps("parseTwoDigitYear")
+const UserStore = BdApi.findModule(m=>m.constructor?.displayName === "UserStore");
 
 export default function ReviewsView({ review , refetch }: { review: Review; refetch: () => void; }) {
 
@@ -96,12 +99,10 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
                 {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
                 {
-                    /*
-                    !Settings.plugins.ReviewDB.hideTimestamps && (
+                    !getSetting("hideTimestamps",false) && (
                         <Timestamp timestamp={moment(review.timestamp * 1000)} >
                             {dateFormat.format(review.timestamp * 1000)}
                         </Timestamp>)
-                    */
                 }
 
                 <p
@@ -115,7 +116,7 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
                 }}>
                     <div className={buttonClasses.wrapper} >
                         <MessageButton type="report" callback={reportRev} />
-                        {//canDeleteReview(review, UserStore.getCurrentUser().id) &&
+                        {canDeleteReview(review, UserStore.getCurrentUser().id) &&
                         (
                             <MessageButton type="delete" callback={delReview} />
                         )}

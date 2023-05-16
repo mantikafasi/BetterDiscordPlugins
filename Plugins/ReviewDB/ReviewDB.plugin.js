@@ -69,6 +69,11 @@ function setSetting(name, value) {
 function showToast(text) {
   BdApi.showToast(text);
 }
+function canDeleteReview(review, userId) {
+  if (review.sender.discordID === userId || getSetting("user", {})?.type === 1 /* Admin */)
+    return true;
+  return false;
+}
 function classes(...classes2) {
   return classes2.join(" ");
 }
@@ -219,9 +224,9 @@ function ReviewBadge(badge) {
         src: badge.icon,
         alt: badge.description,
         style: { verticalAlign: "middle", marginLeft: "4px" },
-        onClick: () => MaskedLinkStore.openUntrustedLink({
-          href: badge.redirectURL
-        })
+        onClick: () => window.open(
+          badge.redirectURL
+        )
       }
     )
   );
@@ -235,6 +240,9 @@ var { container, isHeader } = findModuleByProps3("container", "isHeader");
 var { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps3("avatar", "zalgo");
 var buttonClasses = findModuleByProps3("button", "wrapper", "selected");
 var Alerts = BdApi.findModuleByProps("show", "close");
+var Timestamp = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+var moment = BdApi.findModuleByProps("parseTwoDigitYear");
+var UserStore = BdApi.findModule((m) => m.constructor?.displayName === "UserStore");
 function ReviewsView({ review, refetch }) {
   const dateFormat = new Intl.DateTimeFormat();
   function openModal3() {
@@ -286,7 +294,7 @@ function ReviewsView({ review, refetch }) {
       onClick: () => openModal3()
     },
     review.sender.username
-  ), review.sender.badges.map((badge) => /* @__PURE__ */ BdApi.React.createElement(ReviewBadge, { ...badge })), /* @__PURE__ */ BdApi.React.createElement(
+  ), review.sender.badges.map((badge) => /* @__PURE__ */ BdApi.React.createElement(ReviewBadge, { ...badge })), !getSetting("hideTimestamps", false) && /* @__PURE__ */ BdApi.React.createElement(Timestamp, { timestamp: moment(review.timestamp * 1e3) }, dateFormat.format(review.timestamp * 1e3)), /* @__PURE__ */ BdApi.React.createElement(
     "p",
     {
       className: classes(messageContent),
@@ -295,13 +303,7 @@ function ReviewsView({ review, refetch }) {
     review.comment
   ), /* @__PURE__ */ BdApi.React.createElement("div", { className: classes(container, isHeader, buttons), style: {
     padding: "0px"
-  } }, /* @__PURE__ */ BdApi.React.createElement(
-    "div",
-    { className: buttonClasses.wrapper },
-    /* @__PURE__ */ BdApi.React.createElement(MessageButton, { type: "report", callback: reportRev }),
-    //canDeleteReview(review, UserStore.getCurrentUser().id) &&
-    /* @__PURE__ */ BdApi.React.createElement(MessageButton, { type: "delete", callback: delReview })
-  ))));
+  } }, /* @__PURE__ */ BdApi.React.createElement("div", { className: buttonClasses.wrapper }, /* @__PURE__ */ BdApi.React.createElement(MessageButton, { type: "report", callback: reportRev }), canDeleteReview(review, UserStore.getCurrentUser().id) && /* @__PURE__ */ BdApi.React.createElement(MessageButton, { type: "delete", callback: delReview })))));
 }
 
 // src/plugins/ReviewDB/components/ReviewsView.tsx
@@ -418,65 +420,10 @@ var PreloadedUserSettings = BdApi.Webpack.getModule((m) => m.ProtoClass?.typeNam
 var ButtonWrapperClasses = BdApi.Webpack.getModule((m) => m.buttonWrapper && m.buttonContent);
 var ComponentDispatch = BdApi.Webpack.getModule((m) => m.emitter?._events?.INSERT_TEXT, { searchExports: true });
 
-// include-file:~fileContent/styles.css
-var styles_default = `.vbd-st-modal-content input {
-    background-color: var(--input-background);
-    color: var(--text-normal);
-    width: 95%;
-    padding: 8px 8px 8px 12px;
-    margin: 1em 0;
-    outline: none;
-    border: 1px solid var(--input-background);
-    border-radius: 4px;
-    font-weight: 500;
-    font-style: inherit;
-    font-size: 100%;
-}
-
-.vbd-st-format-label,
-.vbd-st-format-label span {
-    background-color: transparent;
-}
-
-.vbd-st-modal-content [class|="select"] {
-    margin-bottom: 1em;
-}
-
-.vbd-st-modal-content [class|="select"] span {
-    background-color: var(--input-background);
-}
-
-.vbd-st-modal-header {
-    justify-content: space-between;
-    align-content: center;
-}
-
-.vbd-st-modal-header h1 {
-    margin: 0;
-}
-
-.vbd-st-modal-header button {
-    padding: 0;
-}
-
-.vbd-st-preview-text {
-    margin-bottom: 1em;
-}
-
-.vbd-st-button {
-    padding: 0 6px;
-}
-
-.vbd-st-button svg {
-    transform: scale(1.1) translateY(1px);
-}
-`;
-
 // src/plugins/ReviewDB/index.jsx
 var { React: React4 } = BdApi;
 var UserProfile = BdApi.Webpack.getModule((m) => m.Z?.toString().includes("popularApplicationCommandIds"));
 function start() {
-  BdApi.DOM.addStyle("send-timestamps", styles_default);
   BdApi.Patcher.after("reviewdb-user-profiles", UserProfile, "Z", (_this, _args, res) => {
     console.log(res);
     let children = res.props.children;
@@ -485,7 +432,6 @@ function start() {
   });
 }
 function stop() {
-  BdApi.DOM.removeStyle("send-timestamps");
   BdApi.Patcher.unpatchAll("reviewdb-user-profiles");
 }
 function getSettingsPanel() {

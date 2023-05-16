@@ -35,9 +35,9 @@ export default function ReviewBadge(badge: Badge) {
                     alt={badge.description}
                     style={{ verticalAlign: "middle", marginLeft: "4px" }}
                     onClick={() =>
-                        MaskedLinkStore.openUntrustedLink({
-                            href: badge.redirectURL,
-                        })
+                        window.open(
+                            badge.redirectURL
+                        )
                     }
                 />
             )}
