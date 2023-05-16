@@ -23,8 +23,7 @@ import { authorize, getSetting, showToast } from "./Utils";
 
 const API_URL = "https://manti.vendicated.dev";
 
-//Settings.plugins.ReviewDB.token;
-const getToken = () => "guh"
+const getToken = () => getSetting("token", "");
 
 interface Response {
     success: boolean,

@@ -75,7 +75,7 @@ function classes(...classes2) {
 
 // src/plugins/ReviewDB/Utils/ReviewDBAPI.ts
 var API_URL = "https://manti.vendicated.dev";
-var getToken = () => "guh";
+var getToken = () => getSetting("token", "");
 var WarningFlag = 2;
 async function getReviews(id) {
   var flags = 0;
