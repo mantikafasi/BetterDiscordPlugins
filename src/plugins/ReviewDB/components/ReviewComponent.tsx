@@ -1,18 +1,13 @@
 import { Review } from "../entities/Review";
-import { deleteReview, getReviews, reportReview } from "../Utils/ReviewDBAPI";
+import { Alerts, buttonClasses, findModuleByProps, moment, Timestamp, UserStore } from "../Utils/Modules";
+import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
 import { canDeleteReview, openUserProfileModal, showToast, classes, getSetting} from "../Utils/Utils";
 import { MessageButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 const React = BdApi.React as typeof import("react");
-const { findModuleByProps } = BdApi
 const { cozyMessage, buttons, message, groupStart } = findModuleByProps("cozyMessage")
 const { container, isHeader } = findModuleByProps("container", "isHeader")
 const { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo")
-const buttonClasses = findModuleByProps("button", "wrapper", "selected")
-const Alerts = BdApi.findModuleByProps("show","close");
-const Timestamp = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"))
-const moment = BdApi.findModuleByProps("parseTwoDigitYear")
-const UserStore = BdApi.findModule(m=>m.constructor?.displayName === "UserStore");
 
 export default function ReviewsView({ review , refetch }: { review: Review; refetch: () => void; }) {
 
@@ -23,7 +18,6 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
     }
 
     function delReview() {
-
         Alerts.show({
             title: "Are you sure?",
             body: "Do you really want to delete this review?",
@@ -38,7 +32,6 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
                 });
             }
         });
-
     }
 
     function reportRev() {
@@ -105,5 +98,4 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
             </div>
         </div>
     );
-
 };

@@ -9,12 +9,21 @@
 
 "use strict";
 
-// src/plugins/ReviewDB/Utils/Utils.tsx
-var { findModuleByProps, openModal } = BdApi;
-var fetchUser = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".USER(", "getUser"), { searchExports: true });
+// src/plugins/ReviewDB/Utils/Modules.ts
+var { Form, FormItem, FormDivider, Button, Switch, Text, TextInput, Select, FormTitle, Tooltip } = BdApi.findModuleByProps("FormItem");
+var { findModuleByProps, React } = BdApi;
+var Timestamp = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+var moment = findModuleByProps("parseTwoDigitYear");
+var UserStore = BdApi.findModule((m) => m.constructor?.displayName === "UserStore");
+var buttonClasses = findModuleByProps("button", "wrapper", "disabled", "separator");
+var Alerts = findModuleByProps("show", "close");
 var { SelectedChannelStore } = BdApi.findModule((m) => m.constructor?.displayName === "SelectedChannelStore");
+
+// src/plugins/ReviewDB/Utils/Utils.tsx
+var { findModuleByProps: findModuleByProps2, openModal } = BdApi;
+var fetchUser = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".USER(", "getUser"), { searchExports: true });
 async function openUserProfileModal(userId) {
-  const { FluxDispatcher } = findModuleByProps("dispatch", "subscribe");
+  const { FluxDispatcher } = findModuleByProps2("dispatch", "subscribe");
   await fetchUser(userId);
   await FluxDispatcher.dispatch({
     type: "USER_PROFILE_MODAL_OPEN",
@@ -24,9 +33,9 @@ async function openUserProfileModal(userId) {
   });
 }
 function authorize(callback) {
-  const openModal3 = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings("onCloseRequest"), { searchExports: true });
-  const { OAuth2AuthorizeModal } = findModuleByProps("OAuth2AuthorizeModal");
-  openModal3(
+  const openModal2 = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings("onCloseRequest"), { searchExports: true });
+  const { OAuth2AuthorizeModal } = findModuleByProps2("OAuth2AuthorizeModal");
+  openModal2(
     (props) => /* @__PURE__ */ BdApi.React.createElement(
       OAuth2AuthorizeModal,
       {
@@ -155,56 +164,9 @@ async function reportReview(id) {
 }
 
 // src/plugins/ReviewDB/components/MessageButton.tsx
-var { findModuleByProps: findModuleByProps2 } = BdApi;
-var { button, dangerous } = findModuleByProps2("button", "wrapper", "disabled", "separator");
+var { button, dangerous } = buttonClasses;
 function MessageButton(props) {
   return props.type === "delete" ? /* @__PURE__ */ BdApi.React.createElement("div", { className: classes(button, dangerous), "aria-label": "Delete Review", onClick: props.callback }, /* @__PURE__ */ BdApi.React.createElement("svg", { "aria-hidden": "false", width: "16", height: "16", viewBox: "0 0 20 20" }, /* @__PURE__ */ BdApi.React.createElement("path", { fill: "currentColor", d: "M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z" }), /* @__PURE__ */ BdApi.React.createElement("path", { fill: "currentColor", d: "M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z" }))) : /* @__PURE__ */ BdApi.React.createElement("div", { className: button, "aria-label": "Report Review", onClick: () => props.callback() }, /* @__PURE__ */ BdApi.React.createElement("svg", { "aria-hidden": "false", width: "16", height: "16", viewBox: "0 0 20 20" }, /* @__PURE__ */ BdApi.React.createElement("path", { fill: "currentColor", d: "M20,6.002H14V3.002C14,2.45 13.553,2.002 13,2.002H4C3.447,2.002 3,2.45 3,3.002V22.002H5V14.002H10.586L8.293,16.295C8.007,16.581 7.922,17.011 8.076,17.385C8.23,17.759 8.596,18.002 9,18.002H20C20.553,18.002 21,17.554 21,17.002V7.002C21,6.45 20.553,6.002 20,6.002Z" })));
-}
-
-// src/plugins/ReviewDB/components/SelectComponent.tsx
-var React = BdApi.React;
-function SelectComponent({ text, setting, defaultValue = true }) {
-  const [state, setState] = React.useState(getSetting(setting, defaultValue));
-  function handleChange(value) {
-    setState(value);
-    setSetting(setting, value);
-  }
-  return /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: {
-    marginTop: 4,
-    marginBottom: 4
-  } }, text), /* @__PURE__ */ BdApi.React.createElement(
-    Select,
-    {
-      options: [
-        { label: "Enabled", value: true },
-        { label: "Disabled", value: false }
-      ],
-      placeholder: state ? "Enabled" : "Disabled",
-      maxVisibleItems: 3,
-      closeOnSelect: true,
-      isSelected: (v) => v === state,
-      serialize: (v) => String(v),
-      select: handleChange
-    }
-  ));
-}
-
-// src/plugins/ReviewDB/components/SettingsPage.tsx
-var { useState } = BdApi.React;
-var { Form, FormItem, FormDivider, Button, Switch, Text, TextInput, Select, FormTitle, Tooltip } = BdApi.findModuleByProps("FormItem");
-function ReviewDBSettings() {
-  const [oauth2token, setOauth2token] = useState(getSetting("token", ""));
-  return /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement(SelectComponent, { text: "Notify New Reviews", setting: "notifyNewReviews" }), /* @__PURE__ */ BdApi.React.createElement(SelectComponent, { text: "Show Warning On Reviews", setting: "showWarning", defaultValue: true }), /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: { marginBottom: 4, marginLeft: 2, marginTop: 4 } }, "OAUTH2 Token"), /* @__PURE__ */ BdApi.React.createElement(TextInput, { style: { marginBottom: 8 }, value: oauth2token, placeholder: "Login to get token", onChange: (val) => {
-    setSetting("token", val);
-    setOauth2token(val);
-    return true;
-  } }), /* @__PURE__ */ BdApi.React.createElement(Button, { onClick: () => authorize(() => setOauth2token(getSetting("token", ""))) }, "Login"), /* @__PURE__ */ BdApi.React.createElement(FormDivider, { style: { marginTop: 12 } }), /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: { marginTop: 8, marginBottom: 4 } }, "If Login Button is not working"), /* @__PURE__ */ BdApi.React.createElement(Button, { onClick: () => window.open("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify") }, "Get OAUTH2 Token"), /* @__PURE__ */ BdApi.React.createElement("div", { style: {} }, /* @__PURE__ */ BdApi.React.createElement(Button, { style: {
-    display: "inline",
-    marginTop: 8,
-    marginRight: 8
-  }, onClick: () => window.open("https://reviewdb.mantikafasi.dev") }, "ReviewDB Website"), /* @__PURE__ */ BdApi.React.createElement(Button, { style: {
-    display: "inline"
-  }, onClick: () => window.open("https://discord.gg/eWPBSbvznt") }, "ReviewDB Support Server")));
 }
 
 // src/plugins/ReviewDB/components/ReviewBadge.tsx
@@ -234,18 +196,12 @@ function ReviewBadge(badge) {
 
 // src/plugins/ReviewDB/components/ReviewComponent.tsx
 var React2 = BdApi.React;
-var { findModuleByProps: findModuleByProps3 } = BdApi;
-var { cozyMessage, buttons, message, groupStart } = findModuleByProps3("cozyMessage");
-var { container, isHeader } = findModuleByProps3("container", "isHeader");
-var { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps3("avatar", "zalgo");
-var buttonClasses = findModuleByProps3("button", "wrapper", "selected");
-var Alerts = BdApi.findModuleByProps("show", "close");
-var Timestamp = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-var moment = BdApi.findModuleByProps("parseTwoDigitYear");
-var UserStore = BdApi.findModule((m) => m.constructor?.displayName === "UserStore");
+var { cozyMessage, buttons, message, groupStart } = findModuleByProps("cozyMessage");
+var { container, isHeader } = findModuleByProps("container", "isHeader");
+var { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo");
 function ReviewsView({ review, refetch }) {
   const dateFormat = new Intl.DateTimeFormat();
-  function openModal3() {
+  function openModal2() {
     openUserProfileModal(review?.sender.discordID);
   }
   function delReview() {
@@ -281,7 +237,7 @@ function ReviewsView({ review, refetch }) {
     "img",
     {
       className: classes(avatar, clickable),
-      onClick: openModal3,
+      onClick: openModal2,
       src: review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128",
       style: { left: "0px" }
     }
@@ -290,7 +246,7 @@ function ReviewsView({ review, refetch }) {
     {
       className: classes(clickable, username),
       style: { color: "var(--channels-default)", fontSize: "14px" },
-      onClick: () => openModal3()
+      onClick: () => openModal2()
     },
     review.sender.username
   ), review.sender.badges.map((badge) => /* @__PURE__ */ BdApi.React.createElement(ReviewBadge, { ...badge })), !getSetting("hideTimestamps", false) && /* @__PURE__ */ BdApi.React.createElement(Timestamp, { timestamp: moment(review.timestamp * 1e3) }, dateFormat.format(review.timestamp * 1e3)), /* @__PURE__ */ BdApi.React.createElement(
@@ -308,9 +264,9 @@ function ReviewsView({ review, refetch }) {
 // src/plugins/ReviewDB/components/ReviewsView.tsx
 var React3 = BdApi.React;
 var { useEffect } = React3;
-var { findModuleByProps: findModuleByProps4 } = BdApi;
-var Classes = findModuleByProps4("inputDefault", "editable");
-function ReviewsView2({ userId }) {
+var { findModuleByProps: findModuleByProps3 } = BdApi;
+var Classes = findModuleByProps3("inputDefault", "editable");
+function ReviewsView2({ userId, username: username2 }) {
   const token = "";
   const [reviews, setReviews] = React3.useState(null);
   function fetchReviews() {
@@ -367,16 +323,7 @@ function ReviewsView2({ userId }) {
           e.preventDefault();
         }
       },
-      placeholder: (
-        /*
-        token
-            ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)
-                ? `Update review for @${username}`
-                : `Review @${username}`)
-            : "You need to authorize to review users!"
-        */
-        "Review him"
-      ),
+      placeholder: token ? reviews?.some((r) => r.sender.discordID === UserStore.getCurrentUser().id) ? `Update review for @${username2}` : `Review @${username2}` : "You need to authorize to review users!",
       onKeyDown: onKeyPress,
       onClick: () => {
         if (!token) {
@@ -397,37 +344,60 @@ function ReviewsView2({ userId }) {
   ));
 }
 
-// src/plugins/ReviewDB/modal.tsx
-var { useState: useState2, useMemo } = BdApi.React;
-var {
-  Button: Button2,
-  ModalRoot,
-  ModalHeader,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  FormTitle: FormTitle2,
-  FormText,
-  Tooltip: Tooltip2,
-  Select: Select2,
-  openModal: openModal2
-} = BdApi.Webpack.getModule((m) => m.ModalContent);
-var Parser = BdApi.Webpack.getModule((m) => m.parseTopic);
-var PreloadedUserSettings = BdApi.Webpack.getModule((m) => m.ProtoClass?.typeName.endsWith("PreloadedUserSettings"), {
-  searchExports: true
-});
-var ButtonWrapperClasses = BdApi.Webpack.getModule((m) => m.buttonWrapper && m.buttonContent);
-var ComponentDispatch = BdApi.Webpack.getModule((m) => m.emitter?._events?.INSERT_TEXT, { searchExports: true });
+// src/plugins/ReviewDB/components/SelectComponent.tsx
+var React4 = BdApi.React;
+function SelectComponent({ text, setting, defaultValue = true }) {
+  const [state, setState] = React4.useState(getSetting(setting, defaultValue));
+  function handleChange(value) {
+    setState(value);
+    setSetting(setting, value);
+  }
+  return /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: {
+    marginTop: 4,
+    marginBottom: 4
+  } }, text), /* @__PURE__ */ BdApi.React.createElement(
+    Select,
+    {
+      options: [
+        { label: "Enabled", value: true },
+        { label: "Disabled", value: false }
+      ],
+      placeholder: state ? "Enabled" : "Disabled",
+      maxVisibleItems: 3,
+      closeOnSelect: true,
+      isSelected: (v) => v === state,
+      serialize: (v) => String(v),
+      select: handleChange
+    }
+  ));
+}
+
+// src/plugins/ReviewDB/components/SettingsPage.tsx
+var { useState } = BdApi.React;
+function ReviewDBSettings() {
+  const [oauth2token, setOauth2token] = useState(getSetting("token", ""));
+  return /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement(SelectComponent, { text: "Notify New Reviews", setting: "notifyNewReviews" }), /* @__PURE__ */ BdApi.React.createElement(SelectComponent, { text: "Show Warning On Reviews", setting: "showWarning", defaultValue: true }), /* @__PURE__ */ BdApi.React.createElement(SelectComponent, { text: "Show Timestamps on reviews", setting: "hideTimestamps", defaultValue: true }), /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: { marginBottom: 4, marginLeft: 2, marginTop: 4 } }, "OAUTH2 Token"), /* @__PURE__ */ BdApi.React.createElement(TextInput, { style: { marginBottom: 8 }, value: oauth2token, placeholder: "Login to get token", onChange: (val) => {
+    setSetting("token", val);
+    setOauth2token(val);
+    return true;
+  } }), /* @__PURE__ */ BdApi.React.createElement(Button, { onClick: () => authorize(() => setOauth2token(getSetting("token", ""))) }, "Login"), /* @__PURE__ */ BdApi.React.createElement(FormDivider, { style: { marginTop: 12 } }), /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: { marginTop: 8, marginBottom: 4 } }, "If Login Button is not working"), /* @__PURE__ */ BdApi.React.createElement(Button, { onClick: () => window.open("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify") }, "Get OAUTH2 Token"), /* @__PURE__ */ BdApi.React.createElement("div", { style: {} }, /* @__PURE__ */ BdApi.React.createElement(Button, { style: {
+    display: "inline",
+    marginTop: 8,
+    marginRight: 8
+  }, onClick: () => window.open("https://reviewdb.mantikafasi.dev") }, "ReviewDB Website"), /* @__PURE__ */ BdApi.React.createElement(Button, { style: {
+    display: "inline"
+  }, onClick: () => window.open("https://discord.gg/eWPBSbvznt") }, "ReviewDB Support Server")));
+}
 
 // src/plugins/ReviewDB/index.jsx
-var { React: React4 } = BdApi;
+var { React: React5 } = BdApi;
 var UserProfile = BdApi.Webpack.getModule((m) => m.Z?.toString().includes("popularApplicationCommandIds"));
 function start() {
   BdApi.Patcher.after("reviewdb-user-profiles", UserProfile, "Z", (_this, _args, res) => {
     console.log(res);
     let children = res.props.children;
     let children2 = children[children.length - 1].props.children;
-    children2[children2.length - 1].props.children.push(React4.createElement(ReviewsView2, { userId: _args[0].user.id }));
+    children2[children2.length - 1].props.children.push(React5.createElement(ReviewsView2, { userId: _args[0].user.id, username: _args[0].user.username }));
   });
 }
 function stop() {

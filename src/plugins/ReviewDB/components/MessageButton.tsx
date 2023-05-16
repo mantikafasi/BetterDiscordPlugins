@@ -1,6 +1,6 @@
+import { buttonClasses } from "../Utils/Modules";
 import { classes } from "../Utils/Utils";
-const { findModuleByProps } = BdApi;
-const { button, dangerous } = findModuleByProps("button", "wrapper", "disabled", "separator");
+const { button, dangerous } = buttonClasses
 
 export function MessageButton(props) {
     return props.type === "delete"

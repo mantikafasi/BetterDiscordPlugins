@@ -1,5 +1,5 @@
 import { Badge } from "../entities/Badge";
-import { Tooltip } from "./SettingsPage";
+import { Tooltip } from "../Utils/Modules";
 
 export default function ReviewBadge(badge: Badge) {
 

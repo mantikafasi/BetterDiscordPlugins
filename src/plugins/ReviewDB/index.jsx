@@ -1,5 +1,4 @@
 import ReviewsView from "./components/ReviewsView";
-import { ChatBarComponent } from "./modal";
 import ReviewDBSettings from "./components/SettingsPage";
 
 const { React } = BdApi;
@@ -12,7 +11,7 @@ function start() {
         let children = res.props.children;
         let children2 = children[children.length - 1].props.children;
 
-        children2[children2.length - 1].props.children.push(React.createElement(ReviewsView, { userId: _args[0].user.id })) ;
+        children2[children2.length - 1].props.children.push(React.createElement(ReviewsView, { userId: _args[0].user.id, username: _args[0].user.username })) ;
     });
 }
 

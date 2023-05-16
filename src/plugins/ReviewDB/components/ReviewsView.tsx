@@ -8,9 +8,9 @@ import ReviewComponent from "./ReviewComponent";
 import { Review } from "../entities/Review";
 const { findModuleByProps } = BdApi;
 const Classes = findModuleByProps("inputDefault", "editable");
-import { Text } from "./SettingsPage";
+import { Text, UserStore } from "../Utils/Modules";
 
-export default function ReviewsView({ userId }: { userId: string; }) {
+export default function ReviewsView({ userId, username }: { userId: string; username: string; }) {
     //const { token } = Settings.plugins.ReviewDB;
     const token = ""
     //const [refetchCount, setRefetchCount] = React.useState(0);
@@ -86,14 +86,12 @@ export default function ReviewsView({ userId }: { userId: string; }) {
                     }
                 }}
                 placeholder={
-                    /*
                     token
                         ? (reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)
                             ? `Update review for @${username}`
                             : `Review @${username}`)
                         : "You need to authorize to review users!"
-                    */
-                   "Review him"
+
                 }
                 onKeyDown={onKeyPress}
                 onClick={() => {

@@ -1,5 +1,5 @@
 import { getSetting, setSetting } from "../Utils/Utils";
-import { FormTitle, Select } from "./SettingsPage";
+import { FormTitle, Select } from "../Utils/Modules";
 
 const React = BdApi.React as typeof import("react");
 // thank https://github.com/Vendicated/Vencord for this
@@ -29,9 +29,6 @@ export default function SelectComponent({text , setting, defaultValue = true} : 
     serialize={v => String(v)}
     select = {handleChange}
     />
-
   </>
-
-
   )
 }

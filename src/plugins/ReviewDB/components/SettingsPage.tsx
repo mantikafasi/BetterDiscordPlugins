@@ -1,9 +1,9 @@
 
 const { useState } = BdApi.React;
+import { Button, FormDivider, FormTitle, TextInput } from "../Utils/Modules";
 import { authorize, getSetting, setSetting } from "../Utils/Utils";
 import SelectComponent from "./SelectComponent";
 
-export const { Form, FormItem, FormDivider,Button, Switch, Text, TextInput,Select, FormTitle, Tooltip } = BdApi.findModuleByProps("FormItem")
 export default function ReviewDBSettings(): JSX.Element {
     const [oauth2token, setOauth2token] = useState(getSetting("token", ""))
     return (<>
@@ -11,6 +11,8 @@ export default function ReviewDBSettings(): JSX.Element {
         <SelectComponent text="Notify New Reviews" setting={"notifyNewReviews"} />
 
         <SelectComponent text="Show Warning On Reviews" setting={"showWarning"} defaultValue = {true} />
+        <SelectComponent text="Show Timestamps on reviews" setting={"hideTimestamps"} defaultValue = {true} />
+
         <FormTitle style={{ marginBottom: 4, marginLeft: 2, marginTop: 4 }}>OAUTH2 Token</FormTitle>
         <TextInput style={{ marginBottom: 8 }} value={oauth2token} placeholder="Login to get token" onChange={(val) => {
             setSetting("token", val)
