@@ -270,7 +270,6 @@ function ReviewsView({ review, refetch }) {
       body: "Do you really you want to report this review?",
       confirmText: "Report",
       cancelText: "Nevermind",
-      // confirmColor: "red", this just adds a class name and breaks the submit button guh
       onConfirm: () => reportReview(review.id)
     });
   }
