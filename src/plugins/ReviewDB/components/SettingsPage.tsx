@@ -3,7 +3,7 @@ const { useState } = BdApi.React;
 import { authorize, getSetting, setSetting } from "../Utils/Utils";
 import SelectComponent from "./SelectComponent";
 
-export const { Form, FormItem, FormDivider,Button, Switch, Text, TextInput,Select, FormTitle } = BdApi.findModuleByProps("FormItem")
+export const { Form, FormItem, FormDivider,Button, Switch, Text, TextInput,Select, FormTitle, Tooltip } = BdApi.findModuleByProps("FormItem")
 export default function ReviewDBSettings(): JSX.Element {
     const [oauth2token, setOauth2token] = useState(getSetting("token", ""))
     return (<>

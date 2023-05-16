@@ -18,10 +18,10 @@
 
 
 import { Badge } from "../entities/Badge";
+import { Tooltip } from "./SettingsPage";
 
 export default function ReviewBadge(badge: Badge) {
-    return (<>guh</>)
-    /*
+
     return (
         <Tooltip
             text={badge.name}>
@@ -43,5 +43,5 @@ export default function ReviewBadge(badge: Badge) {
             )}
         </Tooltip>
     );
-    */
+
 }
