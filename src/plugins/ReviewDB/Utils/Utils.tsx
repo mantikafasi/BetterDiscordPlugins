@@ -53,7 +53,7 @@ export function authorize(callback?: any) {
             callback={async (u: string) => {
                 try {
                     const url = new URL(u);
-                    url.searchParams.append("clientMod", "vencord");
+                    url.searchParams.append("clientMod", "betterdiscord");
                     const res = await fetch(url, {
                         headers: new Headers({ Accept: "application/json" })
                     });
