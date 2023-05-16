@@ -16,25 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const { findByProps, openModal } = BdApi;
+const { findModuleByProps, openModal } = BdApi;
 import { Review } from "../entities/Review";
 import { UserType } from "../entities/User";
+const fetchUser = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".USER(", "getUser"), { searchExports: true });
+const { SelectedChannelStore } = BdApi.findModule(m=>m.constructor?.displayName === "SelectedChannelStore");
 
 export async function openUserProfileModal(userId: string) {
-    /*
-    await UserUtils.fetchUser(userId);
+    const { FluxDispatcher } = findModuleByProps("dispatch","subscribe");
+
+    await fetchUser(userId);
 
     await FluxDispatcher.dispatch({
         type: "USER_PROFILE_MODAL_OPEN",
         userId,
         channelId: SelectedChannelStore.getChannelId(),
-        analyticsLocation: "Explosive Hotel"
+        analyticsLocation: { section: "Profile Popout" }
     });
-    */
+
 }
 
 export function authorize(callback?: any) {
-    const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
+    const openModal = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings("onCloseRequest"), { searchExports: true });
+
+    const { OAuth2AuthorizeModal } = findModuleByProps("OAuth2AuthorizeModal");
 
     openModal((props: any) =>
         <OAuth2AuthorizeModal
@@ -54,18 +59,26 @@ export function authorize(callback?: any) {
                     });
                     const { token, success } = await res.json();
                     if (success) {
-                        //Settings.plugins.ReviewDB.token = token;
+                        BdApi.saveData("ReviewDB", "token", token);
                         showToast("Successfully logged in!");
                         callback?.();
                     } else if (res.status === 1) {
                         showToast("An Error occurred while logging in.");
                     }
                 } catch (e) {
-                    //new Logger("ReviewDB").error("Failed to authorize", e);
+                    console.error("ReviewDB: Failed to authorize", e);
                 }
             }}
         />
     );
+}
+
+export function getSetting(name: string, defaultValue: any) {
+    return BdApi.getData("ReviewDB", name) ?? defaultValue;
+}
+
+export function setSetting(name: string, value: any) {
+    BdApi.saveData("ReviewDB", name, value);
 }
 
 export function showToast(text: string) {
@@ -75,9 +88,8 @@ export function showToast(text: string) {
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export function canDeleteReview(review: Review, userId: string) {
-    return true;
-
-    //if (review.sender.discordID === userId || Settings.plugins.ReviewDB.user?.type === UserType.Admin) return true;
+    if (review.sender.discordID === userId || getSetting("user",{})?.type === UserType.Admin) return true;
+    return false;
 }
 
 export function classes(...classes: string[]) {

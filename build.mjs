@@ -37,7 +37,7 @@ const plugins = await Promise.all(
 
                             if (result.errors.length) return;
 
-                            const outFile = `C:/Users/Ven/AppData/Roaming/BetterDiscord/plugins/${p}.plugin.js`;
+                            const outFile = `C:/Users/manti/AppData/Roaming/BetterDiscord/plugins/${p}.plugin.js`;
                             const f = await open(outFile, "w");
                             try {
                                 await f.write(await readFile(build.initialOptions.outfile));

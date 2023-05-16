@@ -24,12 +24,13 @@ import { MessageButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 const React = BdApi.React as typeof import("react");
 const { findModuleByProps } = BdApi
+const { cozyMessage, buttons, message, groupStart } = findModuleByProps("cozyMessage")
+const { container, isHeader } = findModuleByProps("container", "isHeader")
+const { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo")
+const buttonClasses = findModuleByProps("button", "wrapper", "selected")
+const Alerts = BdApi.findModuleByProps("show","close");
 
-export default function ReviewsView({ review }: { review: Review; }) {
-    const { cozyMessage, buttons, message, groupStart } = findModuleByProps("cozyMessage")
-    const { container, isHeader } = findModuleByProps("container", "isHeader")
-    const { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo")
-    const buttonClasses = findModuleByProps("button", "wrapper", "selected")
+export default function ReviewsView({ review , refetch }: { review: Review; refetch: () => void; }) {
 
     const dateFormat = new Intl.DateTimeFormat();
 
@@ -37,10 +38,8 @@ export default function ReviewsView({ review }: { review: Review; }) {
         openUserProfileModal(review?.sender.discordID);
     }
 
-
-
     function delReview() {
-        /*
+
         Alerts.show({
             title: "Are you sure?",
             body: "Do you really want to delete this review?",
@@ -55,11 +54,11 @@ export default function ReviewsView({ review }: { review: Review; }) {
                 });
             }
         });
-        */
+
     }
 
     function reportRev() {
-        /*
+
         Alerts.show({
             title: "Are you sure?",
             body: "Do you really you want to report this review?",
@@ -68,7 +67,7 @@ export default function ReviewsView({ review }: { review: Review; }) {
             // confirmColor: "red", this just adds a class name and breaks the submit button guh
             onConfirm: () => reportReview(review.id)
         });
-        */
+
     }
 
     return (

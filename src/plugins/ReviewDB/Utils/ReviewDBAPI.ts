@@ -19,7 +19,7 @@
 
 import { Review } from "../entities/Review";
 import { ReviewDBUser } from "../entities/User";
-import { authorize, showToast } from "./Utils";
+import { authorize, getSetting, showToast } from "./Utils";
 
 const API_URL = "https://manti.vendicated.dev";
 
@@ -37,7 +37,7 @@ const WarningFlag = 0b00000010;
 
 export async function getReviews(id: string): Promise<Review[]> {
     var flags = 0;
-    //if (!Settings.plugins.ReviewDB.showWarning) flags |= WarningFlag;
+    if (!getSetting("showWarning",true)) flags |= WarningFlag;
     const req = await fetch(API_URL + `/api/reviewdb/users/${id}/reviews?flags=${flags}`);
 
     const res = (req.status === 200) ? await req.json() as Response : { success: false, message: "An Error occured while fetching reviews. Please try again later.", reviews: [], updated: false };

@@ -6,15 +6,27 @@
  * @version 1.0.0
  */
 
+
 "use strict";
 
 // src/plugins/ReviewDB/Utils/Utils.tsx
-var { findByProps, openModal } = BdApi;
+var { findModuleByProps, openModal } = BdApi;
+var fetchUser = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".USER(", "getUser"), { searchExports: true });
+var { SelectedChannelStore } = BdApi.findModule((m) => m.constructor?.displayName === "SelectedChannelStore");
 async function openUserProfileModal(userId) {
+  const { FluxDispatcher } = findModuleByProps("dispatch", "subscribe");
+  await fetchUser(userId);
+  await FluxDispatcher.dispatch({
+    type: "USER_PROFILE_MODAL_OPEN",
+    userId,
+    channelId: SelectedChannelStore.getChannelId(),
+    analyticsLocation: { section: "Profile Popout" }
+  });
 }
 function authorize(callback) {
-  const { OAuth2AuthorizeModal } = findByProps("OAuth2AuthorizeModal");
-  openModal(
+  const openModal3 = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings("onCloseRequest"), { searchExports: true });
+  const { OAuth2AuthorizeModal } = findModuleByProps("OAuth2AuthorizeModal");
+  openModal3(
     (props) => /* @__PURE__ */ BdApi.React.createElement(
       OAuth2AuthorizeModal,
       {
@@ -34,17 +46,25 @@ function authorize(callback) {
             });
             const { token, success } = await res.json();
             if (success) {
+              BdApi.saveData("ReviewDB", "token", token);
               showToast("Successfully logged in!");
               callback?.();
             } else if (res.status === 1) {
               showToast("An Error occurred while logging in.");
             }
           } catch (e) {
+            console.error("ReviewDB: Failed to authorize", e);
           }
         }
       }
     )
   );
+}
+function getSetting(name, defaultValue) {
+  return BdApi.getData("ReviewDB", name) ?? defaultValue;
+}
+function setSetting(name, value) {
+  BdApi.saveData("ReviewDB", name, value);
 }
 function showToast(text) {
   BdApi.showToast(text);
@@ -56,8 +76,11 @@ function classes(...classes2) {
 // src/plugins/ReviewDB/Utils/ReviewDBAPI.ts
 var API_URL = "https://manti.vendicated.dev";
 var getToken = () => "guh";
+var WarningFlag = 2;
 async function getReviews(id) {
   var flags = 0;
+  if (!getSetting("showWarning", true))
+    flags |= WarningFlag;
   const req = await fetch(API_URL + `/api/reviewdb/users/${id}/reviews?flags=${flags}`);
   const res = req.status === 200 ? await req.json() : { success: false, message: "An Error occured while fetching reviews. Please try again later.", reviews: [], updated: false };
   if (!res.success) {
@@ -98,10 +121,37 @@ async function addReview(review) {
     return res ?? null;
   });
 }
+function deleteReview(id) {
+  return fetch(API_URL + `/api/reviewdb/users/${id}/reviews`, {
+    method: "DELETE",
+    headers: new Headers({
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    }),
+    body: JSON.stringify({
+      token: getToken(),
+      reviewid: id
+    })
+  }).then((r) => r.json());
+}
+async function reportReview(id) {
+  const res = await fetch(API_URL + "/api/reviewdb/reports", {
+    method: "PUT",
+    headers: new Headers({
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    }),
+    body: JSON.stringify({
+      reviewid: id,
+      token: getToken()
+    })
+  }).then((r) => r.json());
+  showToast(await res.message);
+}
 
 // src/plugins/ReviewDB/components/MessageButton.tsx
-var { findModuleByProps } = BdApi;
-var { button, dangerous } = findModuleByProps("button", "wrapper", "disabled", "separator");
+var { findModuleByProps: findModuleByProps2 } = BdApi;
+var { button, dangerous } = findModuleByProps2("button", "wrapper", "disabled", "separator");
 function MessageButton(props) {
   return props.type === "delete" ? /* @__PURE__ */ BdApi.React.createElement("div", { className: classes(button, dangerous), "aria-label": "Delete Review", onClick: props.callback }, /* @__PURE__ */ BdApi.React.createElement("svg", { "aria-hidden": "false", width: "16", height: "16", viewBox: "0 0 20 20" }, /* @__PURE__ */ BdApi.React.createElement("path", { fill: "currentColor", d: "M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z" }), /* @__PURE__ */ BdApi.React.createElement("path", { fill: "currentColor", d: "M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z" }))) : /* @__PURE__ */ BdApi.React.createElement("div", { className: button, "aria-label": "Report Review", onClick: () => props.callback() }, /* @__PURE__ */ BdApi.React.createElement("svg", { "aria-hidden": "false", width: "16", height: "16", viewBox: "0 0 20 20" }, /* @__PURE__ */ BdApi.React.createElement("path", { fill: "currentColor", d: "M20,6.002H14V3.002C14,2.45 13.553,2.002 13,2.002H4C3.447,2.002 3,2.45 3,3.002V22.002H5V14.002H10.586L8.293,16.295C8.007,16.581 7.922,17.011 8.076,17.385C8.23,17.759 8.596,18.002 9,18.002H20C20.553,18.002 21,17.554 21,17.002V7.002C21,6.45 20.553,6.002 20,6.002Z" })));
 }
@@ -113,19 +163,42 @@ function ReviewBadge(badge) {
 
 // src/plugins/ReviewDB/components/ReviewComponent.tsx
 var React = BdApi.React;
-var { findModuleByProps: findModuleByProps2 } = BdApi;
-function ReviewsView({ review }) {
-  const { cozyMessage, buttons, message, groupStart } = findModuleByProps2("cozyMessage");
-  const { container, isHeader } = findModuleByProps2("container", "isHeader");
-  const { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps2("avatar", "zalgo");
-  const buttonClasses = findModuleByProps2("button", "wrapper", "selected");
+var { findModuleByProps: findModuleByProps3 } = BdApi;
+var { cozyMessage, buttons, message, groupStart } = findModuleByProps3("cozyMessage");
+var { container, isHeader } = findModuleByProps3("container", "isHeader");
+var { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps3("avatar", "zalgo");
+var buttonClasses = findModuleByProps3("button", "wrapper", "selected");
+var Alerts = BdApi.findModuleByProps("show", "close");
+function ReviewsView({ review, refetch }) {
   const dateFormat = new Intl.DateTimeFormat();
   function openModal3() {
     openUserProfileModal(review?.sender.discordID);
   }
   function delReview() {
+    Alerts.show({
+      title: "Are you sure?",
+      body: "Do you really want to delete this review?",
+      confirmText: "Delete",
+      cancelText: "Nevermind",
+      onConfirm: () => {
+        deleteReview(review.id).then((res) => {
+          if (res.success) {
+            refetch();
+          }
+          showToast(res.message);
+        });
+      }
+    });
   }
   function reportRev() {
+    Alerts.show({
+      title: "Are you sure?",
+      body: "Do you really you want to report this review?",
+      confirmText: "Report",
+      cancelText: "Nevermind",
+      // confirmColor: "red", this just adds a class name and breaks the submit button guh
+      onConfirm: () => reportReview(review.id)
+    });
   }
   return /* @__PURE__ */ BdApi.React.createElement("div", { className: classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review"), style: {
     marginLeft: "0px",
@@ -165,18 +238,67 @@ function ReviewsView({ review }) {
   ))));
 }
 
-// src/plugins/ReviewDB/components/ReviewsView.tsx
+// src/plugins/ReviewDB/components/SelectComponent.tsx
 var React2 = BdApi.React;
-var { useEffect } = React2;
-var { findModuleByProps: findModuleByProps3 } = BdApi;
-var Classes = findModuleByProps3("inputDefault", "editable");
+function SelectComponent({ text, setting, defaultValue = true }) {
+  const [state, setState] = React2.useState(getSetting(setting, defaultValue));
+  function handleChange(value) {
+    setState(value);
+    setSetting(setting, value);
+  }
+  return /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: {
+    marginTop: 4,
+    marginBottom: 4
+  } }, text), /* @__PURE__ */ BdApi.React.createElement(
+    Select,
+    {
+      options: [
+        { label: "Enabled", value: true },
+        { label: "Disabled", value: false }
+      ],
+      placeholder: state ? "Enabled" : "Disabled",
+      maxVisibleItems: 3,
+      closeOnSelect: true,
+      isSelected: (v) => v === state,
+      serialize: (v) => String(v),
+      select: handleChange
+    }
+  ));
+}
+
+// src/plugins/ReviewDB/components/SettingsPage.tsx
+var { useState } = BdApi.React;
+var { Form, FormItem, FormDivider, Button, Switch, Text, TextInput, Select, FormTitle } = BdApi.findModuleByProps("FormItem");
+function ReviewDBSettings() {
+  const [oauth2token, setOauth2token] = useState(getSetting("token", ""));
+  return /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement(SelectComponent, { text: "Notify New Reviews", setting: "notifyNewReviews" }), /* @__PURE__ */ BdApi.React.createElement(SelectComponent, { text: "Show Warning On Reviews", setting: "showWarning", defaultValue: true }), /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: { marginBottom: 4, marginLeft: 2, marginTop: 4 } }, "OAUTH2 Token"), /* @__PURE__ */ BdApi.React.createElement(TextInput, { style: { marginBottom: 8 }, value: oauth2token, placeholder: "Login to get token", onChange: (val) => {
+    setSetting("token", val);
+    setOauth2token(val);
+    return true;
+  } }), /* @__PURE__ */ BdApi.React.createElement(Button, { onClick: () => authorize(() => setOauth2token(getSetting("token", ""))) }, "Login"), /* @__PURE__ */ BdApi.React.createElement(FormDivider, { style: { marginTop: 12 } }), /* @__PURE__ */ BdApi.React.createElement(FormTitle, { style: { marginTop: 8, marginBottom: 4 } }, "If Login Button is not working"), /* @__PURE__ */ BdApi.React.createElement(Button, { onClick: () => window.open("https://discord.com/api/oauth2/authorize?client_id=915703782174752809&redirect_uri=https%3A%2F%2Fmanti.vendicated.dev%2FURauth&response_type=code&scope=identify") }, "Get OAUTH2 Token"), /* @__PURE__ */ BdApi.React.createElement("div", { style: {} }, /* @__PURE__ */ BdApi.React.createElement(Button, { style: {
+    display: "inline",
+    marginTop: 8,
+    marginRight: 8
+  }, onClick: () => window.open("https://reviewdb.mantikafasi.dev") }, "ReviewDB Website"), /* @__PURE__ */ BdApi.React.createElement(Button, { style: {
+    display: "inline"
+  }, onClick: () => window.open("https://discord.gg/eWPBSbvznt") }, "ReviewDB Support Server")));
+}
+
+// src/plugins/ReviewDB/components/ReviewsView.tsx
+var React3 = BdApi.React;
+var { useEffect } = React3;
+var { findModuleByProps: findModuleByProps4 } = BdApi;
+var Classes = findModuleByProps4("inputDefault", "editable");
 function ReviewsView2({ userId }) {
   const token = "";
-  const [reviews, setReviews] = React2.useState(null);
-  useEffect(() => {
+  const [reviews, setReviews] = React3.useState(null);
+  function fetchReviews() {
     getReviews(userId).then((res) => {
       setReviews(res);
     });
+  }
+  useEffect(() => {
+    fetchReviews();
   }, [userId]);
   if (!reviews)
     return null;
@@ -195,10 +317,22 @@ function ReviewsView2({ userId }) {
       });
     }
   }
-  return /* @__PURE__ */ BdApi.React.createElement("div", { className: "vc-reviewdb-view" }, reviews?.map(
+  return /* @__PURE__ */ BdApi.React.createElement("div", { className: "vc-reviewdb-view" }, /* @__PURE__ */ BdApi.React.createElement(
+    Text,
+    {
+      tag: "h2",
+      variant: "eyebrow",
+      style: {
+        marginBottom: "8px",
+        color: "var(--header-primary)"
+      }
+    },
+    "User Reviews"
+  ), reviews?.map(
     (review) => /* @__PURE__ */ BdApi.React.createElement(
       ReviewsView,
       {
+        refetch: fetchReviews,
         key: review.id,
         review
       }
@@ -243,18 +377,18 @@ function ReviewsView2({ userId }) {
 }
 
 // src/plugins/ReviewDB/modal.tsx
-var { useState, useMemo } = BdApi.React;
+var { useState: useState2, useMemo } = BdApi.React;
 var {
-  Button,
+  Button: Button2,
   ModalRoot,
   ModalHeader,
   ModalCloseButton,
   ModalContent,
   ModalFooter,
-  FormTitle,
+  FormTitle: FormTitle2,
   FormText,
   Tooltip,
-  Select,
+  Select: Select2,
   openModal: openModal2
 } = BdApi.Webpack.getModule((m) => m.ModalContent);
 var Parser = BdApi.Webpack.getModule((m) => m.parseTopic);
@@ -319,19 +453,26 @@ var styles_default = `.vbd-st-modal-content input {
 `;
 
 // src/plugins/ReviewDB/index.jsx
-var { React: React3 } = BdApi;
+var { React: React4 } = BdApi;
 var UserProfile = BdApi.Webpack.getModule((m) => m.Z?.toString().includes("popularApplicationCommandIds"));
 function start() {
   BdApi.DOM.addStyle("send-timestamps", styles_default);
-  const unpatchOuter = BdApi.Patcher.after("reviewdb-user-profiles", UserProfile, "Z", (_this, _args, res) => {
-    res.props.children.splice(res.props.children.length, 0, React3.createElement(ReviewsView2, { userId: _args[0].user.id }));
+  BdApi.Patcher.after("reviewdb-user-profiles", UserProfile, "Z", (_this, _args, res) => {
+    console.log(res);
+    let children = res.props.children;
+    let children2 = children[children.length - 1].props.children;
+    children2[children2.length - 1].props.children.push(React4.createElement(ReviewsView2, { userId: _args[0].user.id }));
   });
 }
 function stop() {
   BdApi.DOM.removeStyle("send-timestamps");
   BdApi.Patcher.unpatchAll("reviewdb-user-profiles");
 }
+function getSettingsPanel() {
+  return /* @__PURE__ */ BdApi.React.createElement(ReviewDBSettings, null);
+}
 module.exports = () => ({
   start,
-  stop
+  stop,
+  getSettingsPanel
 });

@@ -26,6 +26,7 @@ import ReviewComponent from "./ReviewComponent";
 import { Review } from "../entities/Review";
 const { findModuleByProps } = BdApi;
 const Classes = findModuleByProps("inputDefault", "editable");
+import { Text } from "./SettingsPage";
 
 export default function ReviewsView({ userId }: { userId: string; }) {
     //const { token } = Settings.plugins.ReviewDB;
@@ -34,10 +35,14 @@ export default function ReviewsView({ userId }: { userId: string; }) {
     const [reviews, setReviews] = React.useState<Review[] | null>(null);
     //const username = UserStore.getUser(userId)?.username ?? "";
 
-    useEffect(() => {
+    function fetchReviews() {
         getReviews(userId).then(res => {
             setReviews(res);
         });
+    }
+
+    useEffect(() => {
+        fetchReviews();
     }, [userId]);
 
 
@@ -63,8 +68,8 @@ export default function ReviewsView({ userId }: { userId: string; }) {
     return (
         <div className="vc-reviewdb-view">
             {
-                /*
-                            <Text
+
+            <Text
                 tag="h2"
                 variant="eyebrow"
                 style={{
@@ -74,11 +79,12 @@ export default function ReviewsView({ userId }: { userId: string; }) {
             >
                 User Reviews
             </Text>
-            */
+
             }
 
             {reviews?.map(review =>
                 <ReviewComponent
+                    refetch={fetchReviews}
                     key={review.id}
                     review={review}
                     //refetch={dirtyRefetch}
