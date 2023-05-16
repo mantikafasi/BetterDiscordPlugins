@@ -1,4 +1,4 @@
-import { classes } from "../Utils/Utils";
+import { classes, getSetting } from "../Utils/Utils";
 const React = BdApi.React as typeof import("react");
 const { useEffect } = React;
 
@@ -8,12 +8,11 @@ import ReviewComponent from "./ReviewComponent";
 import { Review } from "../entities/Review";
 const { findModuleByProps } = BdApi;
 const Classes = findModuleByProps("inputDefault", "editable");
-import { Text, UserStore } from "../Utils/Modules";
+import { FormText, Text, UserStore } from "../Utils/Modules";
 
 export default function ReviewsView({ userId, username }: { userId: string; username: string; }) {
-    //const { token } = Settings.plugins.ReviewDB;
-    const token = ""
-    //const [refetchCount, setRefetchCount] = React.useState(0);
+    const token = getSetting("token","");
+
     const [reviews, setReviews] = React.useState<Review[] | null>(null);
     //const username = UserStore.getUser(userId)?.username ?? "";
 
@@ -72,11 +71,12 @@ export default function ReviewsView({ userId, username }: { userId: string; user
                     //refetch={dirtyRefetch}
                 />
             )}
-            {/* reviews?.length === 0 && (
-                <Forms.FormText style={{ paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" }}>
+            { reviews?.length === 0 && (
+                <FormText style={{ paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" }}>
                     Looks like nobody reviewed this user yet. You could be the first!
-                </Forms.FormText>
-             */}
+                </FormText>
+                )
+             }
 
             <textarea
                 className={classes(Classes.inputDefault, "enter-comment")}

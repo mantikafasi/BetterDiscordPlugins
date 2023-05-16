@@ -10,7 +10,7 @@
 "use strict";
 
 // src/plugins/ReviewDB/Utils/Modules.ts
-var { Form, FormItem, FormDivider, Button, Switch, Text, TextInput, Select, FormTitle, Tooltip } = BdApi.findModuleByProps("FormItem");
+var { Form, FormItem, FormDivider, Button, Switch, Text, TextInput, Select, FormTitle, Tooltip, FormText } = BdApi.findModuleByProps("FormItem");
 var { findModuleByProps, React } = BdApi;
 var Timestamp = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
 var moment = findModuleByProps("parseTwoDigitYear");
@@ -267,7 +267,7 @@ var { useEffect } = React3;
 var { findModuleByProps: findModuleByProps3 } = BdApi;
 var Classes = findModuleByProps3("inputDefault", "editable");
 function ReviewsView2({ userId, username: username2 }) {
-  const token = "";
+  const token = getSetting("token", "");
   const [reviews, setReviews] = React3.useState(null);
   function fetchReviews() {
     getReviews(userId).then((res) => {
@@ -314,7 +314,7 @@ function ReviewsView2({ userId, username: username2 }) {
         review
       }
     )
-  ), /* @__PURE__ */ BdApi.React.createElement(
+  ), reviews?.length === 0 && /* @__PURE__ */ BdApi.React.createElement(FormText, { style: { paddingRight: "12px", paddingTop: "0px", paddingLeft: "0px", paddingBottom: "4px", fontWeight: "bold", fontStyle: "italic" } }, "Looks like nobody reviewed this user yet. You could be the first!"), /* @__PURE__ */ BdApi.React.createElement(
     "textarea",
     {
       className: classes(Classes.inputDefault, "enter-comment"),
