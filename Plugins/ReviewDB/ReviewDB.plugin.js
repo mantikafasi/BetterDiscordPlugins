@@ -46,9 +46,9 @@ function authorize(callback) {
         permissions: 0n,
         clientId: "915703782174752809",
         cancelCompletesFlow: false,
-        callback: async (u) => {
+        callback: async (response) => {
           try {
-            const url = new URL(u);
+            const url = new URL(response.location);
             url.searchParams.append("clientMod", "betterdiscord");
             const res = await fetch(url, {
               headers: new Headers({ Accept: "application/json" })
