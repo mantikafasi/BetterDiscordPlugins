@@ -196,7 +196,7 @@ function ReviewBadge(badge) {
 
 // src/plugins/ReviewDB/components/ReviewComponent.tsx
 var React2 = BdApi.React;
-var { cozyMessage, buttons, message, groupStart } = findModuleByProps("cozyMessage");
+var { cozyMessage, buttons, message, buttonInner, groupStart } = findModuleByProps("cozyMessage");
 var { container, isHeader } = findModuleByProps("container", "isHeader");
 var { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo");
 function ReviewsView({ review, refetch }) {
@@ -229,36 +229,50 @@ function ReviewsView({ review, refetch }) {
       onConfirm: () => reportReview(review.id)
     });
   }
-  return /* @__PURE__ */ BdApi.React.createElement("div", { className: classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review"), style: {
-    marginLeft: "0px",
-    paddingLeft: "52px",
-    paddingRight: "16px"
-  } }, /* @__PURE__ */ BdApi.React.createElement("div", null, /* @__PURE__ */ BdApi.React.createElement(
-    "img",
+  return /* @__PURE__ */ BdApi.React.createElement(
+    "div",
     {
-      className: classes(avatar, clickable),
-      onClick: openModal2,
-      src: review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128",
-      style: { left: "0px" }
-    }
-  ), /* @__PURE__ */ BdApi.React.createElement(
-    "span",
-    {
-      className: classes(clickable, username),
-      style: { color: "var(--channels-default)", fontSize: "14px" },
-      onClick: () => openModal2()
+      className: classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review"),
+      style: {
+        marginLeft: "0px",
+        paddingLeft: "52px",
+        paddingRight: "16px"
+      }
     },
-    review.sender.username
-  ), review.sender.badges.map((badge) => /* @__PURE__ */ BdApi.React.createElement(ReviewBadge, { ...badge })), !getSetting("hideTimestamps", false) && /* @__PURE__ */ BdApi.React.createElement(Timestamp, { timestamp: moment(review.timestamp * 1e3) }, dateFormat.format(review.timestamp * 1e3)), /* @__PURE__ */ BdApi.React.createElement(
-    "p",
-    {
-      className: classes(messageContent),
-      style: { fontSize: 15, marginTop: 4, color: "var(--text-normal)" }
-    },
-    review.comment
-  ), /* @__PURE__ */ BdApi.React.createElement("div", { className: classes(container, isHeader, buttons), style: {
-    padding: "0px"
-  } }, /* @__PURE__ */ BdApi.React.createElement("div", { className: buttonClasses.wrapper }, /* @__PURE__ */ BdApi.React.createElement(MessageButton, { type: "report", callback: reportRev }), canDeleteReview(review, UserStore.getCurrentUser().id) && /* @__PURE__ */ BdApi.React.createElement(MessageButton, { type: "delete", callback: delReview })))));
+    /* @__PURE__ */ BdApi.React.createElement("div", null, /* @__PURE__ */ BdApi.React.createElement(
+      "img",
+      {
+        className: classes(avatar, clickable),
+        onClick: openModal2,
+        src: review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128",
+        style: { left: "0px" }
+      }
+    ), /* @__PURE__ */ BdApi.React.createElement(
+      "span",
+      {
+        className: classes(clickable, username),
+        style: { color: "var(--channels-default)", fontSize: "14px" },
+        onClick: () => openModal2()
+      },
+      review.sender.username
+    ), review.sender.badges.map((badge) => /* @__PURE__ */ BdApi.React.createElement(ReviewBadge, { ...badge })), !getSetting("hideTimestamps", false) && /* @__PURE__ */ BdApi.React.createElement(Timestamp, { timestamp: moment(review.timestamp * 1e3) }, dateFormat.format(review.timestamp * 1e3)), /* @__PURE__ */ BdApi.React.createElement(
+      "p",
+      {
+        className: classes(messageContent),
+        style: { fontSize: 15, marginTop: 4, color: "var(--text-normal)" }
+      },
+      review.comment
+    ), /* @__PURE__ */ BdApi.React.createElement(
+      "div",
+      {
+        className: classes(container, isHeader, buttons),
+        style: {
+          padding: "0px"
+        }
+      },
+      /* @__PURE__ */ BdApi.React.createElement("div", { className: classes(buttonClasses.wrapper, buttonInner) }, /* @__PURE__ */ BdApi.React.createElement(MessageButton, { type: "report", callback: reportRev }), canDeleteReview(review, UserStore.getCurrentUser().id) && /* @__PURE__ */ BdApi.React.createElement(MessageButton, { type: "delete", callback: delReview }))
+    ))
+  );
 }
 
 // src/plugins/ReviewDB/components/ReviewsView.tsx

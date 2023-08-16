@@ -1,16 +1,15 @@
 import { Review } from "../entities/Review";
 import { Alerts, buttonClasses, findModuleByProps, moment, Timestamp, UserStore } from "../Utils/Modules";
 import { deleteReview, reportReview } from "../Utils/ReviewDBAPI";
-import { canDeleteReview, openUserProfileModal, showToast, classes, getSetting} from "../Utils/Utils";
+import { canDeleteReview, openUserProfileModal, showToast, classes, getSetting } from "../Utils/Utils";
 import { MessageButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 const React = BdApi.React as typeof import("react");
-const { cozyMessage, buttons, message, groupStart } = findModuleByProps("cozyMessage")
-const { container, isHeader } = findModuleByProps("container", "isHeader")
-const { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo")
+const { cozyMessage, buttons, message, buttonInner, groupStart } = findModuleByProps("cozyMessage");
+const { container, isHeader } = findModuleByProps("container", "isHeader");
+const { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo");
 
-export default function ReviewsView({ review , refetch }: { review: Review; refetch: () => void; }) {
-
+export default function ReviewsView({ review, refetch }: { review: Review; refetch: () => void }) {
     const dateFormat = new Intl.DateTimeFormat();
 
     function openModal() {
@@ -35,7 +34,6 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
     }
 
     function reportRev() {
-
         Alerts.show({
             title: "Are you sure?",
             body: "Do you really you want to report this review?",
@@ -43,18 +41,17 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
             cancelText: "Nevermind",
             onConfirm: () => reportReview(review.id)
         });
-
     }
 
     return (
-        <div className={classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review")} style={
-            {
+        <div
+            className={classes(cozyMessage, wrapper, message, groupStart, cozy, "user-review")}
+            style={{
                 marginLeft: "0px",
                 paddingLeft: "52px",
                 paddingRight: "16px"
-            }
-        }>
-
+            }}
+        >
             <div>
                 <img
                     className={classes(avatar, clickable)}
@@ -69,14 +66,15 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
                 >
                     {review.sender.username}
                 </span>
-                {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
+                {review.sender.badges.map(badge => (
+                    <ReviewBadge {...badge} />
+                ))}
 
-                {
-                    !getSetting("hideTimestamps",false) && (
-                        <Timestamp timestamp={moment(review.timestamp * 1000)} >
-                            {dateFormat.format(review.timestamp * 1000)}
-                        </Timestamp>)
-                }
+                {!getSetting("hideTimestamps", false) && (
+                    <Timestamp timestamp={moment(review.timestamp * 1000)}>
+                        {dateFormat.format(review.timestamp * 1000)}
+                    </Timestamp>
+                )}
 
                 <p
                     className={classes(messageContent)}
@@ -84,13 +82,15 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
                 >
                     {review.comment}
                 </p>
-                <div className={classes(container, isHeader, buttons)} style={{
-                    padding: "0px",
-                }}>
-                    <div className={buttonClasses.wrapper} >
+                <div
+                    className={classes(container, isHeader, buttons)}
+                    style={{
+                        padding: "0px"
+                    }}
+                >
+                    <div className={classes(buttonClasses.wrapper, buttonInner)}>
                         <MessageButton type="report" callback={reportRev} />
-                        {canDeleteReview(review, UserStore.getCurrentUser().id) &&
-                        (
+                        {canDeleteReview(review, UserStore.getCurrentUser().id) && (
                             <MessageButton type="delete" callback={delReview} />
                         )}
                     </div>
@@ -98,4 +98,4 @@ export default function ReviewsView({ review , refetch }: { review: Review; refe
             </div>
         </div>
     );
-};
+}
