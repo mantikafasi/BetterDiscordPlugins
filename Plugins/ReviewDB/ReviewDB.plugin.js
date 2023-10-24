@@ -3,7 +3,7 @@
  * @author mantikafasi
  * @authorId 287555395151593473
  * @description Allows you to review other users
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 
@@ -20,7 +20,7 @@ var Alerts = findModuleByProps("show", "close");
 var { SelectedChannelStore } = BdApi.findModule((m) => m.constructor?.displayName === "SelectedChannelStore");
 
 // src/plugins/ReviewDB/Utils/Utils.tsx
-var { findModuleByProps: findModuleByProps2, openModal } = BdApi;
+var { findModuleByProps: findModuleByProps2 } = BdApi;
 var fetchUser = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings(".USER(", "getUser"), { searchExports: true });
 async function openUserProfileModal(userId) {
   const { FluxDispatcher } = findModuleByProps2("dispatch", "subscribe");
@@ -33,9 +33,9 @@ async function openUserProfileModal(userId) {
   });
 }
 function authorize(callback) {
-  const openModal2 = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings("onCloseRequest"), { searchExports: true });
+  const openModal = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings("onCloseRequest:null!="), { searchExports: true });
   const { OAuth2AuthorizeModal } = findModuleByProps2("OAuth2AuthorizeModal");
-  openModal2(
+  openModal(
     (props) => /* @__PURE__ */ BdApi.React.createElement(
       OAuth2AuthorizeModal,
       {
@@ -199,9 +199,10 @@ var React2 = BdApi.React;
 var { cozyMessage, buttons, message, buttonInner, groupStart } = findModuleByProps("cozyMessage");
 var { container, isHeader } = findModuleByProps("container", "isHeader");
 var { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo");
+var Parser = BdApi.findModuleByProps("parseTopic");
 function ReviewsView({ review, refetch }) {
   const dateFormat = new Intl.DateTimeFormat();
-  function openModal2() {
+  function openModal() {
     openUserProfileModal(review?.sender.discordID);
   }
   function delReview() {
@@ -243,7 +244,7 @@ function ReviewsView({ review, refetch }) {
       "img",
       {
         className: classes(avatar, clickable),
-        onClick: openModal2,
+        onClick: openModal,
         src: review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128",
         style: { left: "0px" }
       }
@@ -252,7 +253,7 @@ function ReviewsView({ review, refetch }) {
       {
         className: classes(clickable, username),
         style: { color: "var(--channels-default)", fontSize: "14px" },
-        onClick: () => openModal2()
+        onClick: () => openModal()
       },
       review.sender.username
     ), review.sender.badges.map((badge) => /* @__PURE__ */ BdApi.React.createElement(ReviewBadge, { ...badge })), !getSetting("hideTimestamps", false) && /* @__PURE__ */ BdApi.React.createElement(Timestamp, { timestamp: moment(review.timestamp * 1e3) }, dateFormat.format(review.timestamp * 1e3)), /* @__PURE__ */ BdApi.React.createElement(
@@ -261,7 +262,7 @@ function ReviewsView({ review, refetch }) {
         className: classes(messageContent),
         style: { fontSize: 15, marginTop: 4, color: "var(--text-normal)" }
       },
-      review.comment
+      Parser.parseGuildEventDescription(review.comment)
     ), /* @__PURE__ */ BdApi.React.createElement(
       "div",
       {

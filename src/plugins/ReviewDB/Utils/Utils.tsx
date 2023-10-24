@@ -1,4 +1,4 @@
-const { findModuleByProps, openModal } = BdApi;
+const { findModuleByProps } = BdApi;
 import { Review } from "../entities/Review";
 import { UserType } from "../entities/User";
 import { SelectedChannelStore } from "./Modules";
@@ -19,7 +19,7 @@ export async function openUserProfileModal(userId: string) {
 }
 
 export function authorize(callback?: any) {
-    const openModal = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings("onCloseRequest"), { searchExports: true });
+    const openModal = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byStrings("onCloseRequest:null!="), { searchExports: true });
 
     const { OAuth2AuthorizeModal } = findModuleByProps("OAuth2AuthorizeModal");
 

@@ -9,6 +9,8 @@ const { cozyMessage, buttons, message, buttonInner, groupStart } = findModuleByP
 const { container, isHeader } = findModuleByProps("container", "isHeader");
 const { avatar, clickable, username, messageContent, wrapper, cozy } = findModuleByProps("avatar", "zalgo");
 
+const Parser = BdApi.findModuleByProps("parseTopic");
+
 export default function ReviewsView({ review, refetch }: { review: Review; refetch: () => void }) {
     const dateFormat = new Intl.DateTimeFormat();
 
@@ -80,7 +82,7 @@ export default function ReviewsView({ review, refetch }: { review: Review; refet
                     className={classes(messageContent)}
                     style={{ fontSize: 15, marginTop: 4, color: "var(--text-normal)" }}
                 >
-                    {review.comment}
+                    {Parser.parseGuildEventDescription(review.comment)}
                 </p>
                 <div
                     className={classes(container, isHeader, buttons)}
